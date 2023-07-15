@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'write-address-to-dynamoDB
+
+  Sample SAM Template for write-address-to-dynamoDB
+
+  '
+Globals:
+  Function:
+    Timeout: 20
+    MemorySize: 128
+Resources:
+  WriteAddressFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: WriteAddressFunction
+      Role:
+        Fn::GetAtt:
+        - MyLambdaWriteRole
+        - Arn
+      Handler: writeaddress.App::handleRequest
+      Runtime: java11
+      Architectures:
+      - x86_64
+      MemorySize: 512
+      Environment:
+        Variables:
+          PARAM1: VALUE
+          JAVA_TOOL_OPTIONS: -XX:+TieredCompilation -XX:TieredStopAtLevel=1
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /write-address
+            Method: put
+    Metadata:
+      SamResourceId: WriteAddressFunction
+  MyLambdaWriteRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: MyLambdaWriteRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: DynamoDBAccessPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:PutItem
+            Resource: arn:aws:dynamodb:us-east-1:292755305053:table/address-table
